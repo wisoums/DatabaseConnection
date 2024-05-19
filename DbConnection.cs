@@ -1,55 +1,35 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
-namespace DatabaseConnection;
+namespace DatabaseConnection
+{
     public class DbConnection
     {
-        //Attributes:
+        // Attributes:
         private string _connection;
-        private Boolean _isOpened;
+        private bool _isOpened;
         private DateTime _openTime;
-        private Boolean _isTimedOut;
+        private bool _isTimedOut;
         
-        //Getter & Setter
+        // Properties:
         public DateTime OpenTime
         {
             get => _openTime;
             set => _openTime = value;
         }
+        
         public string Connection
         {
-            get
-            {
-                return _connection;
-            }
-            set
-            {
-                _connection = value;
-            }
+            get => _connection;
+            set => _connection = value;
         }
         
-        public  Boolean IsOpened
+        public bool IsOpened
         {
-            get
-            {
-                if ((DateTime.Now - _openTime) > TimeSpan.FromMinutes(1))
-                {
-                    _isOpened = false;
-                }
-                else
-                {
-                    _isOpened = true;
-                }
-                return _isOpened;
-            }
-            set
-            {
-                _isOpened = value;
-                
-            }
+            get => _isOpened && !_isTimedOut;
+            set => _isOpened = value;
         }
         
-        public  Boolean IsTimedOut
+        public bool IsTimedOut
         {
             get
             {
@@ -63,60 +43,63 @@ namespace DatabaseConnection;
                 }
                 return _isTimedOut;
             }
-            set
-            {
-                _isTimedOut = value;
-                
-            }
+            set => _isTimedOut = value;
         }
         
-        
-        //Constructor:
-        public DbConnection(string _connection)
+        // Constructor:
+        public DbConnection(string connection)
         {
-            if (String.IsNullOrWhiteSpace(_connection))
+            if (string.IsNullOrWhiteSpace(connection))
             {
-                throw new ConnectionNullorWhitespaceException("Null or Empty connection string are invalid.");
+                throw new ConnectionNullorWhitespaceException("Null or Empty connection string is invalid.");
             }
-            this._connection = _connection;
-            this._isOpened = false;
+            _connection = connection;
+            _isOpened = false;
             _isTimedOut = false;
-            _openTime = DateTime.MinValue;
-
+            _openTime = DateTime.MaxValue;
         }
         
-        //Method for opening connection
-        public void openConnection()
+        // Method for opening connection:
+        public void OpenConnection()
         {
-            if (IsOpened)
+            CheckTimeout();
+            if (_isOpened)
             {
                 Console.WriteLine("The connection is already opened.");
             }
             else
             {
-                IsOpened = true;
-                _openTime=DateTime.Now;
+                _isOpened = true;
+                _openTime = DateTime.Now;
                 Console.WriteLine("The connection is now opened.");  
             }
         }
         
-        //Method for closing connection
-        public void closeConnection()
+        // Method for closing connection:
+        public void CloseConnection()
         {
-            if (!IsOpened)
+            CheckTimeout();
+            if (!_isOpened)
             {
                 Console.WriteLine("The connection is already closed.");
-            }else if (_isTimedOut)
-            {
-                Console.WriteLine("The connection timed Out and already closed automatically.");
             }
             else
             {
-                IsOpened = false;
-                Console.WriteLine("The connection is now closed.");
+                _isOpened = false;
+                Console.WriteLine(_isTimedOut 
+                    ? "The connection timed out and is now closed automatically." 
+                    : "The connection is now closed.");
+            }
+        }
+        public void CheckTimeout()
+        {
+            if (IsOpened && (DateTime.Now - OpenTime) > TimeSpan.FromMinutes(1))
+            {
+                IsTimedOut = true;
+                IsOpened=false;
             }
         }
     }
-
+}
 
 

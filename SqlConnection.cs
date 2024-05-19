@@ -1,65 +1,76 @@
-namespace DatabaseConnection;
-
-public class SqlConnection: DbConnection
+namespace DatabaseConnection
 {
-    //Constructor
-    public SqlConnection(string _connection) : base(_connection)
+    public class SqlConnection : DbConnection
     {
-        OpenTime = DateTime.MinValue;
-        IsOpened = false;
-    }
+        public bool IsTimedOut { get; set; }
 
-    //Method for opening connection
-    public void openConnection()
-    {
-        if (IsOpened)
+        // Constructor
+        public SqlConnection(string connection) : base(connection)
         {
-            Console.WriteLine("The connection is already opened.");
-        }
-        else
-        {
-            IsOpened = true;
-            OpenTime = DateTime.Now;
-            Console.WriteLine("The connection is now opened.");  
-        }
-        
-    }
-        
-    //Method for closing connection
-    public void closeConnection()
-    {
-        if (!IsOpened)
-        {
-            Console.WriteLine("The connection is already closed.");
-        }else if ((DateTime.Now - OpenTime) > TimeSpan.FromMinutes(1))
-        {
+            OpenTime = DateTime.MaxValue;
             IsOpened = false;
-            OpenTime=DateTime.MinValue;
-            Console.WriteLine("The connection timed Out and already closed automatically.");
+            IsTimedOut = false;
         }
-        else
-        {
-            IsOpened = false;
-            Console.WriteLine("The connection is now closed.");
-        }
-        
-    }
-    
-    public void Execute()
-    {
-        if (!IsOpened)
-        {
-            Console.WriteLine("The connection is not opened yet. Try opening it before executing an instruction.");
-        } else if ((DateTime.Now - OpenTime) > TimeSpan.FromMinutes(1))
-        {
-            IsOpened = false;
-            OpenTime=DateTime.MinValue;
-            Console.WriteLine("The connection timed out and closed automatically. Please try opening it again.");
-        }
-        else
-        {
-            Console.WriteLine("The instruction was successfully sent to the database.");
-        }
-    }
 
+        // Method for opening connection
+        public void OpenConnection()
+        {
+            if (IsOpened)
+            {
+                Console.WriteLine("The connection is already opened.");
+            }
+            else
+            {
+                IsOpened = true;
+                OpenTime = DateTime.Now;
+                IsTimedOut = false;  // Reset timeout status when opening a connection
+                Console.WriteLine("The connection is now opened.");
+            }
+        }
+
+        // Method for closing connection
+        public void CloseConnection()
+        {
+            CheckTimeout();
+            if (!IsOpened)
+            {
+                Console.WriteLine("The connection is already closed.");
+            }
+            else
+            {
+                IsOpened = false;
+                OpenTime = DateTime.MaxValue;
+                Console.WriteLine("The connection is now closed.");
+            }
+        }
+
+        // Method for executing a command
+        public void Execute()
+        {
+            CheckTimeout();
+            if (!IsOpened)
+            {
+                Console.WriteLine("The connection is not opened yet. Try opening it before executing an instruction.");
+            }
+            else if (IsTimedOut)
+            {
+                IsOpened = false;
+                OpenTime = DateTime.MaxValue;
+                Console.WriteLine("The connection timed out and closed automatically. Please try opening it again.");
+                IsTimedOut = false;
+            }
+            else
+            {
+                Console.WriteLine("The instruction was successfully sent to the database.");
+            }
+        }
+
+        public void CheckTimeout()
+        {
+            if (IsOpened && (DateTime.Now - OpenTime) > TimeSpan.FromMinutes(1))
+            {
+                IsTimedOut = true;
+            }
+        }
+    }
 }
