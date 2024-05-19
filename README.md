@@ -5,4 +5,4 @@ The program maintains lists of all SQL and Oracle connections, displaying their 
 Overall, this utility is designed to streamline database connection management, making it easy to handle multiple connections and ensuring they are efficiently managed and closed when necessary.
 
 
-Here's a demo for a better overview of the game : https://youtu.be/VItV4jG6hxo?si=c3nVTWsPgSYLhUbQ
+Here's a demo for a better overview of the project : https://youtu.be/VItV4jG6hxo?si=c3nVTWsPgSYLhUbQ
