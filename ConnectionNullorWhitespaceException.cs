@@ -1,11 +1,10 @@
 namespace DatabaseConnection;
 
-public class ConnectionNullorWhitespace 
+public class ConnectionNullorWhitespaceException: Exception
 {
-    static double SafeDivision(double x, double y)
-    {
-        if (y == 0)
-            throw new DivideByZeroException();
-        return x / y;
-    }
+    public ConnectionNullorWhitespaceException() { }
+
+    public ConnectionNullorWhitespaceException(string message)
+        : base(message) { }
+    
 }
